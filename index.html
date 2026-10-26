@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zennwithniaa - Teddy & Love Story 🧸💖</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Sacramento&display=swap" rel="stylesheet">
+    <style>
+        .font-script { font-family: 'Sacramento', cursive; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: linear-gradient(135deg, #fbcfe8 0%, #f472b6 50%, #db2777 100%); color: #500724; min-height: 100vh; }
+        .glass { background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(16px); border: 2px solid rgba(255, 255, 255, 0.7); box-shadow: 0 10px 30px 0 rgba(219, 39, 119, 0.25); }
+        .glass-modal { background: rgba(255, 241, 242, 0.95); backdrop-filter: blur(20px); border: 2px solid rgba(244, 114, 182, 0.5); }
+        
+        @keyframes glowing {
+            0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(236, 72, 153, 0.5); }
+            50% { text-shadow: 0 0 20px rgba(255, 255, 255, 1), 0 0 35px rgba(219, 39, 119, 0.8); }
+            100% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(236, 72, 153, 0.5); }
+        }
+        .glow-text { animation: glowing 3s infinite ease-in-out; }
+
+        @keyframes bounceTeddy {
+            0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+            50% { transform: translateY(-10px) scale(1.05) rotate(-3deg); }
+        }
+        .teddy-float { animation: bounceTeddy 3s infinite ease-in-out; }
+    </style>
+</head>
+<body class="min-h-screen pb-28 relative overflow-x-hidden">
+
+    <!-- Floating Hearts & Petals Canvas Container -->
+    <div id="hearts-container" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-40 glass shadow-md px-4 py-3 flex justify-between items-center border-b border-pink-300">
+        <div class="flex items-center space-x-2">
+            <span class="text-2xl teddy-float">🧸</span>
+            <span class="font-bold text-pink-700 tracking-wider text-sm">zennwithniaa 💖</span>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="exportData()" id="export-btn" class="hidden px-2.5 py-1.5 bg-pink-500 text-white text-xs font-semibold rounded-full shadow hover:bg-pink-600 transition">
+                📥 Simpan
+            </button>
+            <button id="auth-btn" onclick="toggleAuthModal()" class="px-3 py-1.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-semibold rounded-full shadow-lg hover:from-pink-600 hover:to-rose-600 transition flex items-center space-x-1">
+                <span id="auth-icon">🔒</span>
+                <span id="auth-text">Login Pemilik</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-md mx-auto px-4 pt-6 relative z-10 space-y-6">
+
+        <!-- Hero Section with Teddy & Love Theme -->
+        <div class="text-center space-y-3 py-6 relative glass rounded-3xl p-6 shadow-xl border-2 border-white/80">
+            <div class="text-6xl teddy-float inline-block">🧸💕🧸</div>
+            <h1 class="font-script text-6xl text-pink-700 glow-text drop-shadow">zennwithniaa</h1>
+            <p class="text-xs text-pink-800 font-semibold tracking-wide">Pelukan hangat boneka dan cinta abadi kita berdua 💖</p>
+        </div>
+
+        <!-- MUSIC PLAYER WIDGET -->
+        <div class="glass p-4 rounded-3xl shadow-xl space-y-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <span class="text-xl animate-pulse">🎵</span>
+                    <div>
+                        <h3 class="font-bold text-pink-800 text-xs">Backsound Boneka Cinta Kita</h3>
+                        <p id="current-song-title" class="text-[10px] text-pink-700 font-medium">Belum ada lagu yang dipilih</p>
+                    </div>
+                </div>
+                <button onclick="togglePlayMusic()" id="play-pause-btn" class="px-3 py-1.5 bg-pink-600 text-white text-xs font-bold rounded-xl shadow hover:bg-pink-700 transition flex items-center space-x-1">
+                    <span id="play-icon">▶️</span>
+                    <span id="play-text">Putar</span>
+                </button>
+            </div>
+
+            <!-- Search Spotify Songs -->
+            <div class="space-y-2 pt-2 border-t border-pink-300">
+                <div class="flex space-x-1">
+                    <input type="text" id="song-search-input" placeholder="Cari lagu romantis / penyanyi..." class="w-full text-xs p-2 rounded-xl bg-white/70 border border-pink-300 text-pink-900 focus:outline-none focus:ring-1 focus:ring-pink-500">
+                    <button onclick="searchSpotifyTracks()" class="px-3 py-2 bg-pink-600 text-white text-xs font-bold rounded-xl hover:bg-pink-700 transition">Cari</button>
+                </div>
+                <div id="spotify-search-results" class="space-y-1 max-h-40 overflow-y-auto"></div>
+            </div>
+        </div>
+        
+        <audio id="bg-audio" preload="auto"></audio>
+
+        <!-- Navigation Menu Tabs -->
+        <div class="grid grid-cols-3 gap-2">
+            <button onclick="switchTab('durasi')" id="tab-durasi" class="p-2.5 rounded-2xl glass font-bold text-[11px] text-pink-800 shadow-lg border-b-4 border-pink-600 transition flex flex-col items-center justify-center space-y-1 bg-pink-100/80">
+                <span class="text-sm">⏳</span><span>Durasi</span>
+            </button>
+            <button onclick="switchTab('foto')" id="tab-foto" class="p-2.5 rounded-2xl glass font-semibold text-[11px] text-pink-900/80 shadow-sm transition flex flex-col items-center justify-center space-y-1 hover:bg-white/60">
+                <span class="text-sm">📸</span><span>Album</span>
+            </button>
+            <button onclick="switchTab('mood')" id="tab-mood" class="p-2.5 rounded-2xl glass font-semibold text-[11px] text-pink-900/80 shadow-sm transition flex flex-col items-center justify-center space-y-1 hover:bg-white/60">
+                <span class="text-sm">😊</span><span>Mood Harian</span>
+            </button>
+            <button onclick="switchTab('kalender')" id="tab-kalender" class="p-2.5 rounded-2xl glass font-semibold text-[11px] text-pink-900/80 shadow-sm transition flex flex-col items-center justify-center space-y-1 hover:bg-white/60">
+                <span class="text-sm">📆</span><span>Kalender</span>
+            </button>
+            <button onclick="switchTab('surat')" id="tab-surat" class="p-2.5 rounded-2xl glass font-semibold text-[11px] text-pink-900/80 shadow-sm transition flex flex-col items-center justify-center space-y-1 hover:bg-white/60">
+                <span class="text-sm">💬</span><span>Buku Surat</span>
+            </button>
+            <button onclick="switchTab('game')" id="tab-game" class="p-2.5 rounded-2xl glass font-semibold text-[11px] text-pink-900/80 shadow-sm transition flex flex-col items-center justify-center space-y-1 hover:bg-white/60">
+                <span class="text-sm">🎮</span><span>Mini Game</span>
+            </button>
+            <button onclick="switchTab('bucket')" id="tab-bucket" class="p-2.5 rounded-2xl glass font-semibold text-[11px] text-pink-900/80 shadow-sm transition flex flex-col items-center justify-center space-y-1 hover:bg-white/60">
+                <span class="text-sm">📝</span><span>Bucket List</span>
+            </button>
+            <button onclick="switchTab('peta')" id="tab-peta" class="p-2.5 rounded-2xl glass font-semibold text-[11px] text-pink-900/80 shadow-sm transition flex flex-col items-center justify-center space-y-1 hover:bg-white/60">
+                <span class="text-sm">🗺️</span><span>Peta Kenangan</span>
+            </button>
+            <button onclick="switchTab('chat')" id="tab-chat" class="p-2.5 rounded-2xl glass font-semibold text-[11px] text-pink-900/80 shadow-sm transition flex flex-col items-center justify-center space-y-1 hover:bg-white/60">
+                <span class="text-sm">🌌</span><span>Pesan Rahasia</span>
+            </button>
+            <button onclick="switchTab('biodata')" id="tab-biodata" class="p-2.5 rounded-2xl glass font-semibold text-[11px] text-pink-900/80 shadow-sm transition flex flex-col items-center justify-center space-y-1 col-span-3 hover:bg-white/60">
+                <span class="text-sm">👥</span><span>Biodata Kita</span>
+            </button>
+        </div>
+
+        <!-- 1. DURASI -->
+        <div id="section-durasi" class="space-y-4">
+            <div class="glass p-5 rounded-3xl shadow-xl text-center space-y-4 border-2 border-white">
+                <h2 class="font-bold text-pink-900 text-base">🧸 Lama Jalananya Hubungan Kita 💖</h2>
+                <div class="space-y-2 text-left bg-white/50 p-3 rounded-2xl owner-only hidden border border-pink-300">
+                    <label class="text-[10px] font-bold text-pink-800 uppercase">Tanggal Jadian:</label>
+                    <div class="flex space-x-2">
+                        <input type="date" id="start-date-input" class="w-full text-xs p-2 rounded-xl bg-white text-pink-900 border border-pink-300">
+                        <button onclick="updateStartDate()" class="px-4 py-2 bg-pink-600 text-white text-xs font-bold rounded-xl shadow">Atur</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <div class="bg-white/60 p-4 rounded-2xl border border-pink-200 shadow-sm"><div id="val-tahun" class="text-3xl font-extrabold text-pink-600">0</div><div class="text-[10px] uppercase text-pink-800 font-bold mt-1">Tahun</div></div>
+                    <div class="bg-white/60 p-4 rounded-2xl border border-pink-200 shadow-sm"><div id="val-bulan" class="text-3xl font-extrabold text-pink-600">0</div><div class="text-[10px] uppercase text-pink-800 font-bold mt-1">Bulan</div></div>
+                    <div class="bg-white/60 p-4 rounded-2xl border border-pink-200 shadow-sm"><div id="val-hari" class="text-3xl font-extrabold text-pink-600">0</div><div class="text-[10px] uppercase text-pink-800 font-bold mt-1">Hari</div></div>
+                    <div class="bg-white/60 p-4 rounded-2xl border border-pink-200 shadow-sm"><div id="val-jam" class="text-3xl font-extrabold text-pink-600">0</div><div class="text-[10px] uppercase text-pink-800 font-bold mt-1">Jam</div></div>
+                    <div class="bg-white/60 p-4 rounded-2xl border border-pink-200 shadow-sm"><div id="val-menit" class="text-3xl font-extrabold text-pink-600">0</div><div class="text-[10px] uppercase text-pink-800 font-bold mt-1">Menit</div></div>
+                    <div class="bg-white/60 p-4 rounded-2xl border border-pink-200 shadow-sm"><div id="val-detik" class="text-3xl font-extrabold text-pink-600">0</div><div class="text-[10px] uppercase text-pink-800 font-bold mt-1">Detik</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. ALBUM -->
+        <div id="section-foto" class="space-y-4 hidden">
+            <div class="glass p-5 rounded-3xl shadow-xl space-y-4 border-2 border-white">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="font-bold text-pink-900 text-base">📸 Album Foto Boneka & Kita</h2>
+                        <p class="text-xs text-pink-800 font-medium">Momen indah tersusun penuh cinta.</p>
+                    </div>
+                    <div class="owner-only hidden">
+                        <button onclick="openAddAlbumModal()" class="bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold px-3 py-2 rounded-xl shadow">➕ Buat Album</button>
+                    </div>
+                </div>
+                <div id="albums-container" class="space-y-4 pt-2"></div>
+            </div>
+        </div>
+
+        <!-- 3. MOOD TRACKER -->
+        <div id="section-mood" class="space-y-4 hidden">
+            <div class="glass p-5 rounded-3xl shadow-xl space-y-4 border-2 border-white">
+                <h2 class="font-bold text-pink-900 text-base">😊 Catat Suasana Hati Hari Ini</h2>
+                <p class="text-xs text-pink-800 font-medium">Bagaimana perasaanmu atau pasanganmu hari ini?</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="recordMood('😊 B AJA SII')" class="p-3 bg-white/60 hover:bg-pink-200 rounded-xl text-xs text-pink-900 font-semibold border border-pink-300 transition shadow-sm">😊 B AJA SII</button>
+                    <button onclick="recordMood('🥰 SYENENGG BANGEDD')" class="p-3 bg-white/60 hover:bg-pink-200 rounded-xl text-xs text-pink-900 font-semibold border border-pink-300 transition shadow-sm">🥰 SYENENGG BANGEDD</button>
+                    <button onclick="recordMood('😴 Ngantukk, mauu di pok pok')" class="p-3 bg-white/60 hover:bg-pink-200 rounded-xl text-xs text-pink-900 font-semibold border border-pink-300 transition shadow-sm">😴 Ngantukk, mauu di pok pok</button>
+                    <button onclick="recordMood('😔 Capekk')" class="p-3 bg-white/60 hover:bg-pink-200 rounded-xl text-xs text-pink-900 font-semibold border border-pink-300 transition shadow-sm">😔 Capekk</button>
+                    <button onclick="recordMood('😤 betmuttt')" class="p-3 bg-white/60 hover:bg-pink-200 rounded-xl text-xs text-pink-900 font-semibold border border-pink-300 transition shadow-sm">😤 betmuttt</button>
+                    <button onclick="recordMood('🤗 MAU PEYUKK...!!!')" class="p-3 bg-white/60 hover:bg-pink-200 rounded-xl text-xs text-pink-900 font-semibold border border-pink-300 transition shadow-sm">🤗 MAU PEYUKK...!!!</button>
+                </div>
+                <div class="pt-3 border-t border-pink-300">
+                    <h3 class="font-bold text-pink-900 text-xs mb-2">Riwayat Mood:</h3>
+                    <div id="mood-history" class="space-y-1.5 max-h-40 overflow-y-auto"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. KALENDER MOMEN SPESIAL -->
+        <div id="section-kalender" class="space-y-4 hidden">
+            <div class="glass p-5 rounded-3xl shadow-xl space-y-4 border-2 border-white">
+                <div class="flex justify-between items-center">
+                    <h2 class="font-bold text-pink-900 text-base">📆 Kalender Momen Spesial</h2>
+                    <div class="owner-only hidden">
+                        <button onclick="openAddCalendarModal()" class="bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow">➕ Tambah</button>
+                    </div>
+                </div>
+                <div id="calendar-list" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- 5. BUKU SURAT MASA DEPAN -->
+        <div id="section-surat" class="space-y-4 hidden">
+            <div class="glass p-5 rounded-3xl shadow-xl space-y-4 border-2 border-white">
+                <div class="flex justify-between items-center">
+                    <h2 class="font-bold text-pink-900 text-base">💬 Buku Pesan untuk Masa Depan</h2>
+                    <div class="owner-only hidden">
+                        <button onclick="openAddLetterModal()" class="bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow">➕ Tulis Surat</button>
+                    </div>
+                </div>
+                <div id="letters-list" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- 6. MINI GAME -->
+        <div id="section-game" class="space-y-4 hidden">
+            <div class="glass p-5 rounded-3xl shadow-xl space-y-4 border-2 border-white text-center">
+                <h2 class="font-bold text-pink-900 text-base">🎮 Mini Game Boneka Cinta</h2>
+                <p class="text-xs text-pink-800 font-medium">Seberapa jauh kamu mengenal pasanganmu?</p>
+                <div id="game-container" class="space-y-4 text-left pt-2"></div>
+            </div>
+        </div>
+
+        <!-- 7. BUCKET LIST -->
+        <div id="section-bucket" class="space-y-4 hidden">
+            <div class="glass p-5 rounded-3xl shadow-xl space-y-4 border-2 border-white">
+                <div class="flex justify-between items-center">
+                    <h2 class="font-bold text-pink-900 text-base">📝 Bucket List Pasangan</h2>
+                    <div class="owner-only hidden">
+                        <button onclick="openAddBucketModal()" class="bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow">➕ Tambah</button>
+                    </div>
+                </div>
+                <div id="bucket-list" class="space-y-2"></div>
+            </div>
+        </div>
+
+        <!-- 8. PETA KENANGAN -->
+        <div id="section-peta" class="space-y-4 hidden">
+            <div class="glass p-5 rounded-3xl shadow-xl space-y-4 border-2 border-white">
+                <div class="flex justify-between items-center">
+                    <h2 class="font-bold text-pink-900 text-base">🗺️ Peta Kenangan Cinta</h2>
+                    <div class="owner-only hidden">
+                        <button onclick="openAddMapModal()" class="bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow">➕ Tambah Lokasi</button>
+                    </div>
+                </div>
+                <div id="map-list" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- 9. PESAN RAHASIA CHAT -->
+        <div id="section-chat" class="space-y-4 hidden">
+            <div class="glass p-5 rounded-3xl shadow-xl space-y-3 border-2 border-white">
+                <h2 class="font-bold text-pink-900 text-base">🌌 Pesan Rahasia (Chat Mini)</h2>
+                <div id="chat-messages" class="bg-white/60 p-3 rounded-2xl h-56 overflow-y-auto space-y-2 border border-pink-300 text-xs font-medium text-pink-950"></div>
+                <div class="flex space-x-2">
+                    <input type="text" id="chat-input" placeholder="Tulis pesan cinta rahasia..." class="w-full text-xs p-2.5 rounded-xl bg-white text-pink-900 border border-pink-300 focus:outline-none">
+                    <button onclick="sendChatMessage()" class="px-4 py-2 bg-pink-600 text-white text-xs font-bold rounded-xl shadow">Kirim</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. BIODATA -->
+        <div id="section-biodata" class="space-y-4 hidden">
+            <div class="grid grid-cols-1 gap-4">
+                <div class="glass p-5 rounded-3xl shadow-xl space-y-3 border-2 border-white">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-pink-900 text-sm">🧸 <span id="bio1-name-title">Kamu</span></h3>
+                        <button onclick="editBio(1)" class="owner-only hidden text-xs bg-pink-600 text-white px-2 py-1 rounded-lg font-semibold shadow">Edit Biodata</button>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <img id="bio1-img" src="" class="w-20 h-20 rounded-2xl object-cover border-2 border-white shadow-md">
+                        <div class="text-xs space-y-1 text-pink-950 font-medium">
+                            <p><strong class="text-pink-700">Nama:</strong> <span id="bio1-name"></span></p>
+                            <p><strong class="text-pink-700">Panggilan:</strong> <span id="bio1-call"></span></p>
+                            <p><strong class="text-pink-700">Hobi:</strong> <span id="bio1-hobi"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass p-5 rounded-3xl shadow-xl space-y-3 border-2 border-white">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-pink-900 text-sm">💖 <span id="bio2-name-title">Pasangan</span></h3>
+                        <button onclick="editBio(2)" class="owner-only hidden text-xs bg-pink-600 text-white px-2 py-1 rounded-lg font-semibold shadow">Edit Biodata</button>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <img id="bio2-img" src="" class="w-20 h-20 rounded-2xl object-cover border-2 border-white shadow-md">
+                        <div class="text-xs space-y-1 text-pink-950 font-medium">
+                            <p><strong class="text-pink-700">Nama:</strong> <span id="bio2-name"></span></p>
+                            <p><strong class="text-pink-700">Panggilan:</strong> <span id="bio2-call"></span></p>
+                            <p><strong class="text-pink-700">Hobi:</strong> <span id="bio2-hobi"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center pt-4 pb-8 space-y-2">
+            <p class="text-xs text-pink-900 font-bold">Made with 🧸 & ❤️ for Eternal Love</p>
+        </footer>
+    </main>
+
+    <!-- MODALS -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-modal p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-bold text-pink-900 text-sm">🧸 Login Pemilik</h3>
+            <input type="text" id="login-user" placeholder="Username" class="w-full text-xs p-2.5 rounded-xl bg-white text-pink-900 border border-pink-300">
+            <input type="password" id="login-pass" placeholder="Password" class="w-full text-xs p-2.5 rounded-xl bg-white text-pink-900 border border-pink-300">
+            <div class="flex space-x-2">
+                <button onclick="toggleAuthModal()" class="w-1/2 py-2 bg-pink-200 text-pink-900 text-xs font-bold rounded-xl">Batal</button>
+                <button onclick="handleLogin()" class="w-1/2 py-2 bg-pink-600 text-white text-xs font-bold rounded-xl shadow">Masuk</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ADD ALBUM -->
+    <div id="album-modal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-modal p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-bold text-pink-900 text-sm">📸 Buat Album Baru</h3>
+            <input type="text" id="new-album-name" placeholder="Nama Album" class="w-full text-xs p-3 rounded-xl bg-white text-pink-900 border border-pink-300">
+            <div class="flex space-x-2">
+                <button onclick="closeAddAlbumModal()" class="w-1/2 py-2 bg-pink-200 text-pink-900 text-xs font-bold rounded-xl">Batal</button>
+                <button onclick="saveNewAlbum()" class="w-1/2 py-2 bg-pink-600 text-white text-xs font-bold rounded-xl shadow">Buat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ADD CALENDAR -->
+    <div id="calendar-modal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-modal p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-bold text-pink-900 text-sm">📆 Tambah Momen Spesial</h3>
+            <input type="text" id="cal-title" placeholder="Nama Momen" class="w-full text-xs p-2.5 rounded-xl bg-white text-pink-900 border border-pink-300">
+            <input type="date" id="cal-date" class="w-full text-xs p-2.5 rounded-xl bg-white text-pink-900 border border-pink-300">
+            <div class="flex space-x-2">
+                <button onclick="closeAddCalendarModal()" class="w-1/2 py-2 bg-pink-200 text-pink-900 text-xs font-bold rounded-xl">Batal</button>
+                <button onclick="saveNewCalendar()" class="w-1/2 py-2 bg-pink-600 text-white text-xs font-bold rounded-xl shadow">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ADD LETTER -->
+    <div id="letter-modal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-modal p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-bold text-pink-900 text-sm">💬 Tulis Surat Masa Depan</h3>
+            <input type="text" id="let-title" placeholder="Judul Surat" class="w-full text-xs p-2.5 rounded-xl bg-white text-pink-900 border border-pink-300">
+            <input type="date" id="let-date" class="w-full text-xs p-2.5 rounded-xl bg-white text-pink-900 border border-pink-300">
+            <textarea id="let-content" rows="3" placeholder="Isi surat..." class="w-full text-xs p-2.5 rounded-xl bg-white text-pink-900 border border-pink-300"></textarea>
+            <div class="flex space-x-2">
+                <button onclick="closeAddLetterModal()" class="w-1/2 py-2 bg-pink-200 text-pink-900 text-xs font-bold rounded-xl">Batal</button>
+                <button onclick="saveNewLetter()" class="w-1/2 py-2 bg-pink-600 text-white text-xs font-bold rounded-xl shadow">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ADD BUCKET -->
+    <div id="bucket-modal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-modal p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-bold text-pink-900 text-sm">📝 Tambah Bucket List</h3>
+            <input type="text" id="bucket-text-input" placeholder="Kegiatan..." class="w-full text-xs p-3 rounded-xl bg-white text-pink-900 border border-pink-300">
+            <div class="flex space-x-2">
+                <button onclick="closeAddBucketModal()" class="w-1/2 py-2 bg-pink-200 text-pink-900 text-xs font-bold rounded-xl">Batal</button>
+                <button onclick="saveNewBucket()" class="w-1/2 py-2 bg-pink-600 text-white text-xs font-bold rounded-xl shadow">Tambah</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ADD MAP -->
+    <div id="map-modal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-modal p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-bold text-pink-900 text-sm">🗺️ Tambah Tempat Kenangan</h3>
+            <input type="text" id="map-title" placeholder="Nama Tempat" class="w-full text-xs p-2.5 rounded-xl bg-white text-pink-900 border border-pink-300">
+            <input type="text" id="map-link" placeholder="Link Google Maps" class="w-full text-xs p-2.5 rounded-xl bg-white text-pink-900 border border-pink-300">
+            <div class="flex space-x-2">
+                <button onclick="closeAddMapModal()" class="w-1/2 py-2 bg-pink-200 text-pink-900 text-xs font-bold rounded-xl">Batal</button>
+                <button onclick="saveNewMap()" class="w-1/2 py-2 bg-pink-600 text-white text-xs font-bold rounded-xl shadow">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-pink-900 text-pink-100 border border-pink-300 text-xs px-4 py-2.5 rounded-full shadow-2xl z-50 transition-all duration-300 opacity-0 pointer-events-none"></div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        let isOwner = false;
+        let startDate = localStorage.getItem('zenn_start_date') || '2024-01-01';
+        
+        let albums = JSON.parse(localStorage.getItem('zenn_albums')) || [
+            { id: 1, title: 'Kenangan Boneka Kita 🧸💖', photos: [{ id: 101, url: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500', caption: 'Pelukan Pertama' }] }
+        ];
+
+        let moodHistory = JSON.parse(localStorage.getItem('zenn_moods')) || [];
+        let calendarEvents = JSON.parse(localStorage.getItem('zenn_calendar')) || [
+            { id: 1, title: 'Tanggal Jadian 💖', date: '2024-01-01' }
+        ];
+        let letters = JSON.parse(localStorage.getItem('zenn_letters')) || [
+            { id: 1, title: 'Surat 1 Tahun 🧸', date: '2025-01-01', content: 'Terima kasih sudah selalu menemaniku.' }
+        ];
+        let bucketList = JSON.parse(localStorage.getItem('zenn_buckets')) || [
+            { id: 1, text: 'Menonton film bersama 🧸', done: false },
+            { id: 2, text: 'Mengunjungi pantai berdua 🌊', done: false }
+        ];
+        let mapLocations = JSON.parse(localStorage.getItem('zenn_maps')) || [
+            { id: 1, title: 'Tempat Pertama Kali Bertemu 💖', link: 'https://maps.google.com' }
+        ];
+        let chatMessages = JSON.parse(localStorage.getItem('zenn_chats')) || [
+            { sender: 'Sayang', text: 'Hai! Jangan lupa senyum ya hari ini 🧸💖' }
+        ];
+
+        let bios = JSON.parse(localStorage.getItem('zenn_bios')) || {
+            1: { name: 'Kamu', call: 'Sayang', hobi: 'Musik', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300' },
+            2: { name: 'Pasangan', call: 'Cinta', hobi: 'Menulis', img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300' }
+        };
+
+        let playlist = JSON.parse(localStorage.getItem('zenn_playlist')) || [
+            { title: "Beautiful In White", artist: "Shane Filan", url: "https://www.bensound.com/bensound-music/bensound-tenderness.mp3" }
+        ];
+        let currentSongIdx = 0;
+        let isPlaying = false;
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => { toast.classList.remove('opacity-100'); toast.classList.add('opacity-0'); }, 3000);
+        }
+
+        function switchTab(tabName) {
+            ['durasi', 'foto', 'mood', 'kalender', 'surat', 'game', 'bucket', 'peta', 'chat', 'biodata'].forEach(t => {
+                const sec = document.getElementById(`section-${t}`);
+                const tab = document.getElementById(`tab-${t}`);
+                if (sec) sec.classList.add('hidden');
+                if (tab) {
+                    tab.classList.remove('border-b-4', 'border-pink-600', 'font-bold', 'text-pink-900', 'bg-pink-100/80');
+                    tab.classList.add('font-semibold', 'text-pink-900/80');
+                }
+            });
+            document.getElementById(`section-${tabName}`).classList.remove('hidden');
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            if (activeTab) {
+                activeTab.classList.add('border-b-4', 'border-pink-600', 'font-bold', 'text-pink-900', 'bg-pink-100/80');
+                activeTab.classList.remove('font-semibold', 'text-pink-900/80');
+            }
+        }
+
+        // Spotify Search Simulation
+        async function searchSpotifyTracks() {
+            const query = document.getElementById('song-search-input').value.trim();
+            const resultsContainer = document.getElementById('spotify-search-results');
+            resultsContainer.innerHTML = '<p class="text-[10px] text-pink-800">Mencari lagu...</p>';
+            try {
+                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=5`);
+                const data = await res.json();
+                resultsContainer.innerHTML = '';
+                if (data.results.length === 0) {
+                    resultsContainer.innerHTML = '<p class="text-[10px] text-pink-800">Lagu tidak ditemukan.</p>';
+                    return;
+                }
+                data.results.forEach(song => {
+                    resultsContainer.innerHTML += `
+                        <div class="flex items-center justify-between text-[11px] p-2 rounded-xl bg-white/70 text-pink-900 border border-pink-200">
+                            <div class="truncate pr-2">🎵 <strong>${song.trackName}</strong> - <span class="text-pink-700">${song.artistName}</span></div>
+                            <button onclick="addSongToPlaylist('${song.trackName.replace(/'/g, "")}', '${song.artistName.replace(/'/g, "")}', '${song.previewUrl}')" class="px-2 py-1 bg-pink-600 text-white rounded-lg text-[10px] shadow">Pilih</button>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                resultsContainer.innerHTML = '<p class="text-[10px] text-red-600">Gagal mencari lagu.</p>';
+            }
+        }
+
+        function addSongToPlaylist(title, artist, url) {
+            playlist.push({ title: `${title} - ${artist}`, url });
+            localStorage.setItem('zenn_playlist', JSON.stringify(playlist));
+            showToast(`Lagu ${title} berhasil ditambahkan!`);
+            changeSong(playlist.length - 1, `${title} - ${artist}`);
+        }
+
+        function togglePlayMusic() {
+            const audio = document.getElementById('bg-audio');
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+                document.getElementById('play-text').innerText = 'Putar';
+                document.getElementById('play-icon').innerText = '▶️';
+            } else {
+                if (!audio.src) audio.src = playlist[0].url;
+                audio.play().then(() => {
+                    isPlaying = true;
+                    document.getElementById('play-text').innerText = 'Jeda';
+                    document.getElementById('play-icon').innerText = '⏸️';
+                }).catch(() => alert('Pilih lagu terlebih dahulu dari hasil pencarian!'));
+            }
+        }
+
+        function changeSong(idx, title) {
+            currentSongIdx = idx;
+            const audio = document.getElementById('bg-audio');
+            audio.src = playlist[idx].url;
+            audio.play().then(() => {
+                isPlaying = true;
+                document.getElementById('play-text').innerText = 'Jeda';
+                document.getElementById('play-icon').innerText = '⏸️';
+                document.getElementById('current-song-title').innerText = title;
+            });
+        }
+
+        // Mood Tracker
+        function recordMood(moodText) {
+            const date = new Date().toLocaleDateString();
+            moodHistory.unshift({ date, mood: moodText });
+            localStorage.setItem('zenn_moods', JSON.stringify(moodHistory));
+            renderMoods();
+            showToast('Mood berhasil dicatat! 🧸💖');
+        }
+
+        function renderMoods() {
+            const container = document.getElementById('mood-history');
+            container.innerHTML = moodHistory.length === 0 ? '<p class="text-xs text-pink-800 italic">Belum ada catatan mood.</p>' : '';
+            moodHistory.forEach(m => {
+                container.innerHTML += `<div class="p-2 rounded-xl bg-white/70 text-xs text-pink-900 border border-pink-200 flex justify-between shadow-sm"><span>${m.mood}</span><span class="text-[10px] text-pink-600 font-semibold">${m.date}</span></div>`;
+            });
+        }
+
+        // Mini Game
+        function renderMiniGame() {
+            const container = document.getElementById('game-container');
+            container.innerHTML = `
+                <div class="space-y-3">
+                    <p class="text-xs font-bold text-pink-900">1. Apa boneka kesukaan pasangannu?</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="checkGameAnswer(true)" class="p-2 bg-white/70 hover:bg-pink-200 rounded-xl text-xs text-pink-900 font-semibold border border-pink-300 shadow-sm">Teddy Bear Pink 🧸</button>
+                        <button onclick="checkGameAnswer(false)" class="p-2 bg-white/70 hover:bg-pink-200 rounded-xl text-xs text-pink-900 font-semibold border border-pink-300 shadow-sm">Kadal Hijau 🦎</button>
+                    </div>
+                    <p id="game-result" class="text-xs font-bold text-pink-700 pt-2"></p>
+                </div>
+            `;
+        }
+
+        function checkGameAnswer(isCorrect) {
+            const res = document.getElementById('game-result');
+            res.innerText = isCorrect ? '🎉 Benar sekali! Kamu sangat mengenalnya! 🧸💖' : '❌ Ups, salah! Coba tebak lagi ya.';
+        }
+
+        // CRUD functions for Owner
+        function handleLogin() {
+            if(document.getElementById('login-user').value === 'zennwithniaa' && document.getElementById('login-pass').value === '090826') {
+                isOwner = true;
+                document.getElementById('auth-modal').classList.add('hidden');
+                document.querySelectorAll('.owner-only').forEach(el => el.classList.remove('hidden'));
+                document.getElementById('auth-text').innerText = 'Pemilik (Aktif)';
+                showToast('Login berhasil sebagai pemilik! 🔓');
+                renderAll();
+            } else { alert('Salah password/username!'); }
+        }
+
+        function toggleAuthModal() { document.getElementById('auth-modal').classList.toggle('hidden'); }
+
+        // Calendar
+        function openAddCalendarModal() { document.getElementById('calendar-modal').classList.remove('hidden'); }
+        function closeAddCalendarModal() { document.getElementById('calendar-modal').classList.add('hidden'); }
+        function saveNewCalendar() {
+            const title = document.getElementById('cal-title').value;
+            const date = document.getElementById('cal-date').value;
+            if(title && date) {
+                calendarEvents.push({ id: Date.now(), title, date });
+                localStorage.setItem('zenn_calendar', JSON.stringify(calendarEvents));
+                closeAddCalendarModal(); renderCalendar(); showToast('Momen ditambahkan!');
+            }
+        }
+        function deleteCalendar(id) {
+            calendarEvents = calendarEvents.filter(c => c.id !== id);
+            localStorage.setItem('zenn_calendar', JSON.stringify(calendarEvents));
+            renderCalendar(); showToast('Momen dihapus.');
+        }
+        function renderCalendar() {
+            const cList = document.getElementById('calendar-list');
+            cList.innerHTML = '';
+            calendarEvents.forEach(c => {
+                cList.innerHTML += `<div class="p-3 bg-white/70 rounded-xl border border-pink-200 flex justify-between items-center text-xs shadow-sm"><div><strong class="text-pink-900">${c.title}</strong><p class="text-[10px] text-pink-700">${c.date}</p></div>${isOwner ? `<button onclick="deleteCalendar(${c.id})" class="text-red-500 font-bold">Hapus</button>` : ''}</div>`;
+            });
+        }
+
+        // Letters
+        function openAddLetterModal() { document.getElementById('letter-modal').classList.remove('hidden'); }
+        function closeAddLetterModal() { document.getElementById('letter-modal').classList.add('hidden'); }
+        function saveNewLetter() {
+            const title = document.getElementById('let-title').value;
+            const date = document.getElementById('let-date').value;
+            const content = document.getElementById('let-content').value;
+            if(title && date && content) {
+                letters.push({ id: Date.now(), title, date, content });
+                localStorage.setItem('zenn_letters', JSON.stringify(letters));
+                closeAddLetterModal(); renderLetters(); showToast('Surat disimpan!');
+            }
+        }
+        function deleteLetter(id) {
+            letters = letters.filter(l => l.id !== id);
+            localStorage.setItem('zenn_letters', JSON.stringify(letters));
+            renderLetters(); showToast('Surat dihapus.');
+        }
+        function renderLetters() {
+            const lList = document.getElementById('letters-list');
+            lList.innerHTML = '';
+            letters.forEach(l => {
+                lList.innerHTML += `<div class="p-3 bg-white/70 rounded-xl border border-pink-200 space-y-1 text-xs shadow-sm"><div class="flex justify-between"><strong class="text-pink-900">${l.title}</strong><span class="text-[10px] text-pink-600 font-semibold">Buka: ${l.date}</span></div><p class="text-pink-950 italic">"${l.content}"</p>${isOwner ? `<button onclick="deleteLetter(${l.id})" class="text-red-500 font-bold text-[10px]">Hapus Surat</button>` : ''}</div>`;
+            });
+        }
+
+        // Bucket List
+        function openAddBucketModal() { document.getElementById('bucket-modal').classList.remove('hidden'); }
+        function closeAddBucketModal() { document.getElementById('bucket-modal').classList.add('hidden'); }
+        function saveNewBucket() {
+            const text = document.getElementById('bucket-text-input').value;
+            if(text) {
+                bucketList.push({ id: Date.now(), text, done: false });
+                localStorage.setItem('zenn_buckets', JSON.stringify(bucketList));
+                closeAddBucketModal(); renderBucketList(); showToast('Bucket list ditambah!');
+            }
+        }
+        function deleteBucket(id) {
+            bucketList = bucketList.filter(b => b.id !== id);
+            localStorage.setItem('zenn_buckets', JSON.stringify(bucketList));
+            renderBucketList(); showToast('Bucket list dihapus.');
+        }
+        function renderBucketList() {
+            const bList = document.getElementById('bucket-list');
+            bList.innerHTML = '';
+            bucketList.forEach(b => {
+                bList.innerHTML += `<div class="p-2.5 bg-white/70 rounded-xl border border-pink-200 flex justify-between items-center text-xs shadow-sm"><span class="text-pink-900 font-medium">🧸 ${b.text}</span>${isOwner ? `<button onclick="deleteBucket(${b.id})" class="text-red-500 font-bold">Hapus</button>` : ''}</div>`;
+            });
+        }
+
+        // Map Locations
+        function openAddMapModal() { document.getElementById('map-modal').classList.remove('hidden'); }
+        function closeAddMapModal() { document.getElementById('map-modal').classList.add('hidden'); }
+        function saveNewMap() {
+            const title = document.getElementById('map-title').value;
+            const link = document.getElementById('map-link').value;
+            if(title && link) {
+                mapLocations.push({ id: Date.now(), title, link });
+                localStorage.setItem('zenn_maps', JSON.stringify(mapLocations));
+                closeAddMapModal(); renderMaps(); showToast('Lokasi disimpan!');
+            }
+        }
+        function deleteMap(id) {
+            mapLocations = mapLocations.filter(m => m.id !== id);
+            localStorage.setItem('zenn_maps', JSON.stringify(mapLocations));
+            renderMaps(); showToast('Lokasi dihapus.');
+        }
+        function renderMaps() {
+            const mList = document.getElementById('map-list');
+            mList.innerHTML = '';
+            mapLocations.forEach(m => {
+                mList.innerHTML += `<div class="p-3 bg-white/70 rounded-xl border border-pink-200 flex justify-between items-center text-xs shadow-sm"><div><strong class="text-pink-900">📍 ${m.title}</strong><br><a href="${m.link}" target="_blank" class="text-pink-600 underline text-[10px] font-bold">Buka di Google Maps</a></div>${isOwner ? `<button onclick="deleteMap(${m.id})" class="text-red-500 font-bold">Hapus</button>` : ''}</div>`;
+            });
+        }
+
+        // Albums
+        function openAddAlbumModal() { document.getElementById('album-modal').classList.remove('hidden'); }
+        function closeAddAlbumModal() { document.getElementById('album-modal').classList.add('hidden'); }
+        function saveNewAlbum() {
+            const title = document.getElementById('new-album-name').value;
+            if(title) {
+                albums.unshift({ id: Date.now(), title, photos: [] });
+                localStorage.setItem('zenn_albums', JSON.stringify(albums));
+                closeAddAlbumModal(); renderAlbums(); showToast('Album dibuat!');
+            }
+        }
+        function deleteAlbum(id) {
+            albums = albums.filter(a => a.id !== id);
+            localStorage.setItem('zenn_albums', JSON.stringify(albums));
+            renderAlbums(); showToast('Album dihapus.');
+        }
+        function renderAlbums() {
+            const container = document.getElementById('albums-container');
+            container.innerHTML = '';
+            albums.forEach(a => {
+                let pHTML = '';
+                a.photos.forEach(p => {
+                    pHTML += `<div class="bg-white/70 p-2 rounded-xl relative shadow-sm"><img src="${p.url}" class="w-full h-28 object-cover rounded-lg"><p class="text-[10px] text-pink-900 mt-1 font-medium">${p.caption}</p></div>`;
+                });
+                container.innerHTML += `<div class="glass p-4 rounded-2xl border border-pink-300 space-y-2 shadow-md"><div class="flex justify-between items-center"><h3 class="font-bold text-pink-900 text-xs">📸 ${a.title}</h3>${isOwner ? `<button onclick="deleteAlbum(${a.id})" class="text-red-500 text-xs font-bold">Hapus Album</button>` : ''}</div><div class="grid grid-cols-2 gap-2">${pHTML || '<p class="text-[10px] text-pink-700">Belum ada foto.</p>'}</div></div>`;
+            });
+        }
+
+        // Chat
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            if(input.value.trim()) {
+                chatMessages.push({ sender: isOwner ? 'Pemilik' : 'Pasangan', text: input.value });
+                localStorage.setItem('zenn_chats', JSON.stringify(chatMessages));
+                input.value = '';
+                renderChats();
+            }
+        }
+        function renderChats() {
+            const box = document.getElementById('chat-messages');
+            box.innerHTML = '';
+            chatMessages.forEach(c => {
+                box.innerHTML += `<div><strong class="text-pink-700">${c.sender}:</strong> <span class="text-pink-950">${c.text}</span></div>`;
+            });
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // Biodata Edit
+        function editBio(i) {
+            const name = prompt('Nama:', bios[i].name) || bios[i].name;
+            const call = prompt('Panggilan:', bios[i].call) || bios[i].call;
+            const hobi = prompt('Hobi:', bios[i].hobi) || bios[i].hobi;
+            const img = prompt('URL Foto Avatar:', bios[i].img) || bios[i].img;
+            bios[i] = { name, call, hobi, img };
+            localStorage.setItem('zenn_bios', JSON.stringify(bios));
+            renderBios();
+            showToast('Biodata diperbarui!');
+        }
+
+        function renderBios() {
+            for(let i=1; i<=2; i++) {
+                document.getElementById(`bio${i}-name-title`).innerText = bios[i].name;
+                document.getElementById(`bio${i}-name`).innerText = bios[i].name;
+                document.getElementById(`bio${i}-call`).innerText = bios[i].call;
+                document.getElementById(`bio${i}-hobi`).innerText = bios[i].hobi;
+                document.getElementById(`bio${i}-img`).src = bios[i].img;
+            }
+        }
+
+        function renderAll() {
+            renderMoods();
+            renderCalendar();
+            renderLetters();
+            renderBucketList();
+            renderMaps();
+            renderAlbums();
+            renderMiniGame();
+            renderChats();
+            renderBios();
+        }
+
+        renderAll();
+    </script>
+</body>
+</html>
